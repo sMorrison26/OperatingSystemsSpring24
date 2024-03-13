@@ -26,7 +26,7 @@ int next_exp(unsigned int seed, float max, float lambda){
     /* avoid values that are far down the "long tail" of the distribution */
     if ( x > 8000 ) { i--; continue; }
 
-    if ( i < 20 ) printf( "x is %lf\n", x );
+    // if ( i < 20 ) printf( "x is %lf\n", x );
     sum += x;
     if ( i == 0 || x < min ) { min = x; }
     if ( i == 0 || x > max ) { max = x; }
@@ -37,18 +37,19 @@ int next_exp(unsigned int seed, float max, float lambda){
 
 
 int main(int argc, char** argv){
-  if (argc != 5){
+  if (argc != 6){
     fprintf(stderr,"ERROR: \nUSAGE: <n> <ncpu> <seed> <lambda> <upper_bound>");
   }
   int n = atoi(argv[1]);
-  int NCPU = atoi(argv[2]);
+  int nCPU = atoi(argv[2]);
   int seed = atoi(argv[3]);
   float lambda = atof(argv[4]);
   int upperBound = atoi(argv[5]);
   
   // Check to see if command line args are parsed properly
   // printf("%d, %d, %d, %.3f, %d\n", n, NCPU, seed, lambda, upperBound);
-  // next_exp()
+  int avg = next_exp(seed, upperBound, lambda);
+  printf("%d\n", avg);
   
   return 0;
 }
