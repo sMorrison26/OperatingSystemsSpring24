@@ -37,15 +37,20 @@ int next_exp(unsigned int seed, float max, float lambda){
 
 
 int main(int argc, char** argv){
+
   if (argc != 6){
-    fprintf(stderr,"ERROR: \nUSAGE: <n> <ncpu> <seed> <lambda> <upper_bound>");
+    fprintf(stderr,"ERROR: \nUSAGE: <n> <ncpu> <seed> <lambda> <upper_bound>\n");
+    return 1;
   }
+
   int n = atoi(argv[1]);
   int nCPU = atoi(argv[2]);
   int seed = atoi(argv[3]);
   float lambda = atof(argv[4]);
   int upperBound = atoi(argv[5]);
   
+  printf("<<< PROJECT PART I -- process set (n=%d) with %d CPU-bound process >>>\n",n,nCPU);
+
   // Check to see if command line args are parsed properly
   // printf("%d, %d, %d, %.3f, %d\n", n, NCPU, seed, lambda, upperBound);
   int avg = next_exp(seed, upperBound, lambda);
