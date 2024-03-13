@@ -10,13 +10,12 @@ double next_exp(int max, float lambda){
   double result = 0.0;
 
   // Generate a random number from a uniform distribution
-  double random_num = drand48();
+  double random_num;// = drand48();
   while (1) {
+    random_num = drand48();
     result = -log(random_num) / (lambda);
-    if (result > max){
-      random_num = drand48();
+    if (result > max)
       continue;
-    }
     else
       return result;
   }
@@ -24,6 +23,7 @@ double next_exp(int max, float lambda){
 
 int checkNextExp(int upperBound, float lambda){
   int nextExp = ceil(next_exp(upperBound, lambda));
+  return nextExp;
   while (nextExp >= upperBound){
     nextExp = ceil(next_exp(upperBound, lambda));
   }
@@ -63,7 +63,7 @@ int main(int argc, char** argv){
   // printf("%d, %d, %d, %.3f, %d\n", n, NCPU, seed, lambda, upperBound);
   srand48(seed);
   for (int i=0; i<n; i++){
-    int arrivalTime = next_exp(upperBound, lambda);
+    int arrivalTime = floor(next_exp(upperBound, lambda));
     int CPUBursts = ceil(drand48()*64);
     char processLetter = (char) 65 + i;
     int IOBoundProcesses = n - nCPU;
@@ -81,8 +81,8 @@ int main(int argc, char** argv){
           printf("--> CPU burst %dms\n",CPUBurstTime);
         } else {
           //CPU & I/O
-          int nextExp = checkNextExp(upperBound,lambda);
-          int IOBurstTime = (ceil(nextExp)*10)/8;
+          nextExp = checkNextExp(upperBound,lambda);
+          int IOBurstTime = ((ceil(nextExp)*10)/8);
           printf("--> CPU burst %dms --> I/O burst %dms\n",CPUBurstTime,IOBurstTime);
         }
       }
