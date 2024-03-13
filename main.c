@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <math.h>
-#include <time.h>
 #include <unistd.h>
 
 //exponential distribution psuedo-random number generator
@@ -34,7 +33,7 @@ int checkNextExp(int upperBound, float lambda){
 int main(int argc, char** argv){
 
   if (argc != 6){
-    fprintf(stderr,"ERROR: USAGE: <n> <ncpu> <seed> <lambda> <upper_bound>\n");
+    fprintf(stderr,"ERROR: <Incorrect number of arguments>");
     return EXIT_FAILURE;
   }
 
@@ -44,16 +43,16 @@ int main(int argc, char** argv){
   float lambda = atof(argv[4]);
   int upperBound = atoi(argv[5]);
 
-  // Error check n
-  if (n > 26 || n < 0) {
-    fprintf(stderr, "ERROR: incorrect number of processes\n");
-    return EXIT_FAILURE;
-  }
-  //# CPU processes > total processes count
-  if (nCPU > n || nCPU < 0){
-    fprintf(stderr,"ERROR: incorrect number of CPU processes\n");
-    return EXIT_FAILURE;
-  }
+  // // Error check n
+  // if (n > 26 || n < 0) {
+  //   fprintf(stderr, "ERROR: <incorrect number of processes>\n");
+  //   return EXIT_FAILURE;
+  // }
+  // //# CPU processes > total processes count
+  // if (nCPU > n || nCPU < 0){
+  //   fprintf(stderr,"ERROR: <incorrect number of CPU processes>\n");
+  //   return EXIT_FAILURE;
+  // }
 
 
   printf("<<< PROJECT PART I -- process set (n=%d) with %d CPU-bound process",n,nCPU);
