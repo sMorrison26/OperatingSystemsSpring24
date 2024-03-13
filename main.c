@@ -34,8 +34,8 @@ int checkNextExp(int upperBound, float lambda){
 int main(int argc, char** argv){
 
   if (argc != 6){
-    fprintf(stderr,"ERROR: \nUSAGE: <n> <ncpu> <seed> <lambda> <upper_bound>\n");
-    return 1;
+    fprintf(stderr,"ERROR: USAGE: <n> <ncpu> <seed> <lambda> <upper_bound>\n");
+    return EXIT_FAILURE;
   }
 
   int n = atoi(argv[1]);
@@ -45,13 +45,20 @@ int main(int argc, char** argv){
   int upperBound = atoi(argv[5]);
 
   // Error check n
-  if (n > 26) {
-    fprintf(stderr, "ERROR: number of processes exceeds 26\n");
-    return -1;
+  if (n > 26 || n < 0) {
+    fprintf(stderr, "ERROR: incorrect number of processes\n");
+    return EXIT_FAILURE;
+  }
+  //# CPU processes > total processes count
+  if (nCPU > n || nCPU < 0){
+    fprintf(stderr,"ERROR: incorrect number of CPU processes\n");
+    return EXIT_FAILURE;
   }
 
 
-  printf("<<< PROJECT PART I -- process set (n=%d) with %d CPU-bound process >>>\n",n,nCPU);
+  printf("<<< PROJECT PART I -- process set (n=%d) with %d CPU-bound process",n,nCPU);
+  if (nCPU != 1) printf("es >>>\n");
+  else printf(" >>>\n");
 
   // Check to see if command line args are parsed properly
   // printf("%d, %d, %d, %.3f, %d\n", n, NCPU, seed, lambda, upperBound);
@@ -60,10 +67,13 @@ int main(int argc, char** argv){
     int arrivalTime = next_exp(upperBound, lambda);
     int CPUBursts = ceil(drand48()*64);
     char processLetter = (char) 65 + i;
-
-    if (i>nCPU){
+    int IOBoundProcesses = n - nCPU;
+    if (i>=IOBoundProcesses){
       // CPU BOUND
-      printf("CPU-bound process %c: arrival time %dms; %d CPU bursts:\n",processLetter,arrivalTime,CPUBursts);
+      printf("CPU-bound process %c: arrival time %dms; %d CPU burst",processLetter,arrivalTime,CPUBursts);
+      if (CPUBursts != 1) printf("s:\n");
+      else printf(":\n");
+
       for (int j=0; j<CPUBursts; j++){
         int nextExp = checkNextExp(upperBound,lambda);
         int CPUBurstTime = ceil(nextExp)*4;
@@ -79,8 +89,10 @@ int main(int argc, char** argv){
       }
     } else {
       // IO BOUND
-      printf("I/O-bound process %c: arrival time %dms; %d CPU bursts:\n",processLetter,arrivalTime,CPUBursts);
-      //do sumn
+      printf("I/O-bound process %c: arrival time %dms; %d CPU burst",processLetter,arrivalTime,CPUBursts);
+      if (CPUBursts != 1) printf("s:\n");
+      else printf(":\n");
+
       for (int j=0; j<CPUBursts; j++){
         int nextExp = checkNextExp(upperBound,lambda);
         int CPUBurstTime = nextExp;
@@ -95,9 +107,6 @@ int main(int argc, char** argv){
         }
       }
     }
-
-
-
   }
-  return 0;
+  return EXIT_SUCCESS;
 }
