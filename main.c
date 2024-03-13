@@ -6,35 +6,30 @@
 #include <unistd.h>
 
 //exponential distribution psuedo-random number generator
-int next_exp(unsigned int seed, float max, float lambda){
-  srand48(seed);
+double next_exp(int max, float lambda){
+  // Apply the exponential distribution formula with scaling to limit the maximum value
+  double result = 0.0;
 
-                      /* uniform to exponential distribution: */
-                      /*                                      */
-                      /*       -ln(1-r)                       */
-                      /*  x = ----------                      */
-  double sum = 0;     /*        lambda                        */
-  double min = 0;
-  int iterations = 1000000;     /* <== make this number very large */
-                                /* average should be 1/lambda ==> 1000 */
-
-  for (int i=0; i<iterations; i++){
-
-    double r = drand48();         /* uniform dist [0.00,1.00) -- also check out random() */
-    double x = -log(r) / lambda;  /* log() is natural log */
-
-    /* avoid values that are far down the "long tail" of the distribution */
-    if ( x > 8000 ) { i--; continue; }
-
-    // if ( i < 20 ) printf( "x is %lf\n", x );
-    sum += x;
-    if ( i == 0 || x < min ) { min = x; }
-    if ( i == 0 || x > max ) { max = x; }
+  // Generate a random number from a uniform distribution
+  double random_num = drand48();
+  while (1) {
+    result = -log(random_num) / (lambda);
+    if (result > max){
+      random_num = drand48();
+      continue;
+    }
+    else
+      return result;
   }
-
-  return sum / iterations;
 }
 
+int checkNextExp(int upperBound, float lambda){
+  int nextExp = ceil(next_exp(upperBound, lambda));
+  while (nextExp >= upperBound){
+    nextExp = ceil(next_exp(upperBound, lambda));
+  }
+  return nextExp;
+}
 
 int main(int argc, char** argv){
 
@@ -48,13 +43,61 @@ int main(int argc, char** argv){
   int seed = atoi(argv[3]);
   float lambda = atof(argv[4]);
   int upperBound = atoi(argv[5]);
-  
+
+  // Error check n
+  if (n > 26) {
+    fprintf(stderr, "ERROR: number of processes exceeds 26\n");
+    return -1;
+  }
+
+
   printf("<<< PROJECT PART I -- process set (n=%d) with %d CPU-bound process >>>\n",n,nCPU);
 
   // Check to see if command line args are parsed properly
   // printf("%d, %d, %d, %.3f, %d\n", n, NCPU, seed, lambda, upperBound);
-  int avg = next_exp(seed, upperBound, lambda);
-  printf("%d\n", avg);
-  
+  srand48(seed);
+  for (int i=0; i<n; i++){
+    int arrivalTime = next_exp(upperBound, lambda);
+    int CPUBursts = ceil(drand48()*64);
+    char processLetter = (char) 65 + i;
+
+    if (i>nCPU){
+      // CPU BOUND
+      printf("CPU-bound process %c: arrival time %dms; %d CPU bursts:\n",processLetter,arrivalTime,CPUBursts);
+      for (int j=0; j<CPUBursts; j++){
+        int nextExp = checkNextExp(upperBound,lambda);
+        int CPUBurstTime = ceil(nextExp)*4;
+        if (j==CPUBursts-1){
+          //only cpu
+          printf("--> CPU burst %dms\n",CPUBurstTime);
+        } else {
+          //CPU & I/O
+          int nextExp = checkNextExp(upperBound,lambda);
+          int IOBurstTime = (ceil(nextExp)*10)/8;
+          printf("--> CPU burst %dms --> I/O burst %dms\n",CPUBurstTime,IOBurstTime);
+        }
+      }
+    } else {
+      // IO BOUND
+      printf("I/O-bound process %c: arrival time %dms; %d CPU bursts:\n",processLetter,arrivalTime,CPUBursts);
+      //do sumn
+      for (int j=0; j<CPUBursts; j++){
+        int nextExp = checkNextExp(upperBound,lambda);
+        int CPUBurstTime = nextExp;
+        if (j==CPUBursts-1){
+          //only cpu
+          printf("--> CPU burst %dms\n",CPUBurstTime);
+        } else {
+          //CPU & I/O
+          nextExp = checkNextExp(upperBound,lambda);
+          int IOBurstTime = ceil(nextExp)*10;
+          printf("--> CPU burst %dms --> I/O burst %dms\n",CPUBurstTime,IOBurstTime);
+        }
+      }
+    }
+
+
+
+  }
   return 0;
 }
